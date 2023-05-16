@@ -1,3 +1,4 @@
+from shared.utility import send_mail
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -33,8 +34,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
             # send_phone_code(user.phone_number, code)
         elif user.auth_type == VIA_EMAIL:
             code = user.create_verify(VIA_EMAIL)
-            # send_mail_code(user.email, code)
+            send_mail(user.email, code)
         user.save()
+        return user
 
     def validate(self, data):
         super(CustomUserSerializer, self).validate(data)
