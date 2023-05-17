@@ -9,6 +9,7 @@ python-decouple = "*"
 pillow = "*"
 djangorestframework-simplejwt = "*"
 djangorestframework = "*"
+phonenumbers = "*"
 
 [dev-packages]
 

@@ -28,9 +28,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = super(CustomUserSerializer, self).create(validated_data)
-        print(user)
         if user.auth_type == VIA_PHONE:
             code = user.create_verify(VIA_PHONE)
+            print(code)
             # send_phone_code(user.phone_number, code)
         elif user.auth_type == VIA_EMAIL:
             code = user.create_verify(VIA_EMAIL)
@@ -66,3 +66,25 @@ class CustomUserSerializer(serializers.ModelSerializer):
             raise ValidationError(data)
         return data
 
+    def validate_email_phone_number(self, value):
+        value = str(value.lower())
+        if value and CustomUser.objects.filter(phone_number=value).exists():
+            data = {
+                'success': False,
+                'message': 'Bu raqamdan avval foydalanilgan'
+            }
+            raise ValidationError(data)
+
+        elif value and CustomUser.objects.filter(email=value).exists():
+            data = {
+                'success': False,
+                'message': 'Bu emaildan avval foydalanilgan'
+            }
+            raise ValidationError(data)
+        return value
+
+    # def to_representation(self, instance):
+    #     data = super(CustomUserSerializer, self).to_representation(instance)
+    #     data.update(instance.token())
+    #
+    #     return data

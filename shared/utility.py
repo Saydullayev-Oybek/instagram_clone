@@ -1,22 +1,27 @@
 import re
 import threading
+import phonenumbers
 
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from rest_framework.exceptions import ValidationError
 
 email_regex = re.compile(r"^[a-z0-9]+[\.'\-]*[a-z0-9]+@(gmail|googlemail)\.com$")
-phone_regex = re.compile(r"(\d{3})\D*(\d{3})\D*(\d{4})\D*(\d*)$")
+phone_regex = re.compile(r"^(\+|00)[1-9][0-9 \-\(\)\.]{7,32}$")
 
 def check_email_or_phone(email_or_phone):
+    # phone_num = phonenumbers.parse(email_or_phone)
+
     if re.fullmatch(email_regex, email_or_phone):
         email_or_phone = "email"
+
     elif re.fullmatch(phone_regex, email_or_phone):
         email_or_phone = "phone"
+
     else:
         data = {
-            'message': 'Email yoki telefoningiz notogri',
-            'success': False
+            'success': False,
+            'message': 'Email yoki telefoningiz notogri'
         }
         raise ValidationError(data)
 
