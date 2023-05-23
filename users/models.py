@@ -78,6 +78,7 @@ class CustomUser(AbstractUser, BaseModel):
 
     def token(self):
         refresh = RefreshToken.for_user(self)
+        print('token', refresh)
         return {
             'access': str(refresh.access_token),
             'refresh_token': str(refresh)
@@ -114,9 +115,8 @@ class UserConfirmation(BaseModel):
         return str(self.user.__str__())
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            if self.verify_type == VIA_PHONE:
-                self.expiration_time = datetime.now() + timedelta(minutes=PHONE_EXPIRATION)
-            else:
-                self.expiration_time = datetime.now() + timedelta(minutes=EMAIL_EXPIRATION)
+        if self.verify_type == VIA_PHONE:
+            self.expiration_time = datetime.now() + timedelta(minutes=PHONE_EXPIRATION)
+        else:
+            self.expiration_time = datetime.now() + timedelta(minutes=EMAIL_EXPIRATION)
         super(UserConfirmation, self).save(*args, **kwargs)

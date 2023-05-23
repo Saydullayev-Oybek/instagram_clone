@@ -10,6 +10,7 @@ pillow = "*"
 djangorestframework-simplejwt = "*"
 djangorestframework = "*"
 phonenumbers = "*"
+twilio = "*"
 
 [dev-packages]
 
