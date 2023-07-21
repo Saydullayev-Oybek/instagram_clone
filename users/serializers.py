@@ -95,20 +95,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #     data.update(token_value)
     #
     #     return data
-    def to_representation(self, instance):
-        data = super(CustomUserSerializer, self).to_representation(instance)
 
-        # Access the user object from the serializer context
-        user = self.context['request'].user
-
-        # Retrieve the user token
-        token = user.token() if hasattr(user, 'token') else None
-        # token = instance.token()
-
-        # Add the token value to the serialized data
-        data['tokens'] = token
-
-        return data
 
 
 class ChangeUserInfoSerializer(serializers.Serializer):
@@ -179,7 +166,7 @@ class ChangeUserPhotoSerializer(serializers.Serializer):
         'jpg', 'jpeg', 'png', 'pdf', 'heic', 'heif'
     ])])
 
-    def update(self, instance, validated_data):
+    def updated(self, instance, validated_data):
         photo = validated_data.get('photo')
 
         if photo:

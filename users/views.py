@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
 from shared.utility import send_mail
 from .models import CustomUser, NEW, CODE_VERIFIED, VIA_EMAIL, VIA_PHONE
@@ -14,13 +15,13 @@ from .serializers import CustomUserSerializer, ChangeUserInfoSerializer, ChangeU
 
 
 class CreateUserView(CreateAPIView):
-    queryset = CustomUser.objects.all
-    permission_classes = (permissions.AllowAny, )
+    queryset = CustomUser.objects.all()
+    permission_classes = [permissions.AllowAny, ]
     serializer_class = CustomUserSerializer
 
 
 class VerifyAPIView(APIView):
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [AllowAny, ]
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
@@ -53,41 +54,40 @@ class VerifyAPIView(APIView):
         return True
 
 
-# class GetNewVerifyCode(APIView):
-#     authentication_classes = [SessionAuthentication]
-#     permission_classes = [AllowAny, ]
-#
-#     def get(self, request, *args, **kwargs):
-#         user = self.request.user
-#         self.check_verification(user)
-#         if user.auth_type == VIA_EMAIL:
-#             code = user.create_verify(VIA_EMAIL)
-#             send_mail(user.email, code)
-#         elif user.auth_type == VIA_PHONE:
-#             code = user.create_verify(VIA_PHONE)
-#             send_mail(user.phone_number, code)
-#         else:
-#             data = {
-#                 'success': False,
-#                 'message': 'email yoki telefon raqam xato'
-#             }
-#             return ValidationError(data)
-#         return Response(
-#             {
-#                 'success': True,
-#                 'message': 'Tasdiqlash kodingiz boshqatdan konatildi'
-#             }
-#         )
-#
-#     @staticmethod
-#     def check_verification(user):
-#         verifies = user.verify_code(expiration_time__gte=datetime.now(), is_confirmed=False)
-#         print(verifies)
-#         if verifies.exists():
-#             data = {
-#                 'message': 'Kodingiz holi ishlatish uchun yaroqli, biroz kutb turing'
-#             }
-#             return ValidationError(data)
+class GetNewVerifyCode(APIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        self.check_verification(user)
+        if user.auth_type == VIA_EMAIL:
+            code = user.create_verify(VIA_EMAIL)
+            send_mail(user.email, code)
+        elif user.auth_type == VIA_PHONE:
+            code = user.create_verify(VIA_PHONE)
+            send_mail(user.phone_number, code)
+        else:
+            data = {
+                'success': False,
+                'message': 'email yoki telefon raqam xato'
+            }
+            return ValidationError(data)
+        return Response(
+            {
+                'success': True,
+                'message': 'Tasdiqlash kodingiz boshqatdan konatildi'
+            }
+        )
+
+    @staticmethod
+    def check_verification(user):
+        verifies = user.verify_code(expiration_time__gte=datetime.now(), is_confirmed=False)
+        print(verifies)
+        if verifies.exists():
+            data = {
+                'message': 'Kodingiz holi ishlatish uchun yaroqli, biroz kutb turing'
+            }
+            return ValidationError(data)
 
 class ChangeUserInfoView(UpdateAPIView):
     permission_classes = [AllowAny, ]
@@ -99,7 +99,6 @@ class ChangeUserInfoView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         super(ChangeUserInfoView, self).update(self, *args, **kwargs)
-
         data = {
             'success': True,
             'message': 'User updated successfully',
