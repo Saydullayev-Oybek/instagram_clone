@@ -97,7 +97,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #     return data
 
 
-
 class ChangeUserInfoSerializer(serializers.Serializer):
     first_name = serializers.CharField(write_only=True, required=True)
     last_name = serializers.CharField(write_only=True, required=True)
@@ -161,6 +160,7 @@ class ChangeUserInfoSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+
 class ChangeUserPhotoSerializer(serializers.Serializer):
     photo = serializers.ImageField(validators=[FileExtensionValidator(allowed_extensions=[
         'jpg', 'jpeg', 'png', 'pdf', 'heic', 'heif'
@@ -174,4 +174,3 @@ class ChangeUserPhotoSerializer(serializers.Serializer):
             instance.auth_status = PHOTO_STEP
             instance.save()
         return instance
-

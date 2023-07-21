@@ -7,6 +7,7 @@ from shared.models import BaseModel
 
 User = get_user_model()
 
+
 class Post(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     image = models.ImageField(upload_to='post_images', validators=[
@@ -18,6 +19,10 @@ class Post(BaseModel):
         db_table = 'posts'
         verbose_name = 'post'
         verbose_name_plural = 'posts'
+
+    def __str__(self):
+        return f"{self.caption}"
+
 
 class PostComment(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -31,6 +36,9 @@ class PostComment(BaseModel):
         blank=True
     )
 
+    def __str__(self):
+        return self.comment
+
 class PostLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
@@ -38,9 +46,11 @@ class PostLike(BaseModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['author', 'post'],
+                fields=('author', 'post'),
+                name='PostLikeUnique'
             )
         ]
+
 
 class CommentLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -49,7 +59,7 @@ class CommentLike(BaseModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=['author', 'comment'],
+                fields=('author', 'comment'),
+                name='CommentLikeUnique'
             )
         ]
-
