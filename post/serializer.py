@@ -66,6 +66,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
             'comment',
             'parent',
             'replies',
+            'post',
             'me_liked',
             'likes_count'
         ]

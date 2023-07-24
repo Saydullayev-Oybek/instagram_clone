@@ -1,11 +1,9 @@
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rich.status import Status
-
 from shared.custom_pagination import CustomPagination
-from post.serializer import PostSerializer, PostCommentSerializer, PostLikeSerializer, CommentLikeSerializer
-from .models import Post, PostLike, PostComment, CommentLike
+from post.serializer import PostSerializer, PostCommentSerializer
+from .models import Post, PostComment
 
 
 class PostAPIView(generics.ListAPIView):
@@ -66,12 +64,28 @@ class CommentAPIView(generics.ListAPIView):
         return queryset
 
 
-class CommentCreateAPIView(generics.CreateAPIView):
+class CommentCreateAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
     permission_classes = [AllowAny, ]
 
-    def perform_create(self, serializer):
+    def get_queryset(self):
         post_id = self.kwargs['pk']
         queryset = PostComment.objects.filter(post__id=post_id)
-        serializer.save(author=self.request.user, post_id=post_id)
         return queryset
+
+    def perform_create(self, serializer):
+        post_id = self.kwargs['pk']
+        serializer.save(author=self.request.user, post_id=post_id)
+
+
+class CommentListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = PostCommentSerializer
+    permission_classes = [AllowAny, ]
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = PostComment.objects.all()
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
