@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from post.models import Post, PostLike, PostComment
+from post.models import Post, PostLike, PostComment, CommentLike
 from users.models import CustomUser
 
 
@@ -73,8 +73,8 @@ class PostCommentSerializer(serializers.ModelSerializer):
 
     def get_replies(self, obj):
         if obj.child.exists():
-            serializers = self.__class__(obj.child.all, many=True, context=self.context)
-            return serializers
+            serializer = self.__class__(obj.child.all, many=True, context=self.context)
+            return serializer
         else:
             return None
 
@@ -94,6 +94,7 @@ class PostLikeSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
 
     class Meta:
+        model = PostLike
         fields = ('id', 'author', 'post')
 
 
@@ -101,5 +102,5 @@ class CommentLikeSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
 
     class Meta:
+        model = CommentLike
         fields = ('id', 'author', 'comment')
-
