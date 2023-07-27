@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from shared.custom_pagination import CustomPagination
 from post.serializer import PostSerializer, PostCommentSerializer, PostLikeSerializer, CommentLikeSerializer
 from .models import Post, PostComment, PostLike, CommentLike
@@ -78,17 +80,12 @@ class CommentCreateAPIView(generics.ListCreateAPIView):
         serializer.save(author=self.request.user, post_id=post_id)
 
 
-class CommentListCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = PostCommentSerializer
+class CommentListAPIView(generics.ListAPIView):
+    serializer_class = PostCommentSerializer(many=True)
     permission_classes = [AllowAny, ]
-    pagination_class = CustomPagination
 
     def get_queryset(self):
-        queryset = PostComment.objects.all()
-        return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        return PostComment.objects.all()
 
 
 class CommentRetrieveUpdateDestroyApiView(generics.RetrieveUpdateDestroyAPIView):
@@ -132,17 +129,49 @@ class PostLikesAPIView(generics.ListAPIView):
         return queryset
 
 
-class PostRetrieveLikesAPIView(generics.ListCreateAPIView):
-    serializer_class = PostLikeSerializer
-    permission_classes = [AllowAny, ]
+class PostLikesCreateAPIView(APIView):
 
-    def get_queryset(self):
-        post_id = self.kwargs['pk']
-        queryset = PostLike.objects.filter(post__id=post_id)
-        return queryset
+    def post(self, pk):
+        try:
+            post_like = PostLike.objects.create(
+                author=self.request.user,
+                post_id=pk
+            )
+            serializer = PostLikeSerializer(post_like)
+            data = {
+                'success': True,
+                'message': 'Add like this post',
+                'data': serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            data = {
+                'success': False,
+                'message': f"{str(e)}",
+                'data': None
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    def delete(self, pk):
+        try:
+            post_like = PostLike.objects.get(
+                auhtor=self.request.user,
+                post_id=pk
+            )
+            post_like.delete()
+            data = {
+                'success': True,
+                'message': 'Like successfully deleted',
+                'data': None
+            }
+            return Response(data, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            data = {
+                'success': False,
+                'message': f"{str(e)}",
+                'data': None
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommentLikesAPIView(generics.ListAPIView):
@@ -155,7 +184,7 @@ class CommentLikesAPIView(generics.ListAPIView):
         return queryset
 
 
-class CommentRetrieveLikesAPIView(generics.ListCreateAPIView):
+class CommentLikesCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CommentLikeSerializer
     permission_classes = [AllowAny, ]
 
@@ -163,6 +192,3 @@ class CommentRetrieveLikesAPIView(generics.ListCreateAPIView):
         comment_id = self.kwargs['pk']
         queryset = CommentLike.objects.filter(comment__id=comment_id)
         return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)

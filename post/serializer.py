@@ -32,6 +32,16 @@ class PostSerializer(serializers.ModelSerializer):
             'me_liked'
         ]
 
+    def get_me_liked(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        if user.is_authenticated:
+            try:
+                PostLike.objects.filter(post=obj, auhtor=user)
+                return True
+            except PostLike.DoesNotExists:
+                return False
+
     @staticmethod
     def get_post_likes_count(obj):
         return obj.likes.count()
@@ -39,16 +49,6 @@ class PostSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_post_comments_count(obj):
         return obj.comments.count()
-
-    def get_me_liked(self, obj):
-        request = self.context.get('request', None)
-        if request and request.user.is_authenticated:
-            try:
-                PostLike.objects.get(post=obj, author=request.user)
-                return True
-            except PostLike.DoesNotExist:
-                return False
-        return False
 
 
 class PostCommentSerializer(serializers.ModelSerializer):
