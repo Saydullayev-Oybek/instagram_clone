@@ -2,17 +2,17 @@ import random
 import uuid
 from datetime import datetime, timedelta
 
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from shared.models import BaseModel
 
-
 ORDINARY_USER, ADMIN, MANAGER = ('ordinary_user', 'admin', 'manager')
 VIA_EMAIL, VIA_PHONE = ('via_email', 'via_phone')
 NEW, CODE_VERIFIED, DONE, PHOTO_STEP = ('new', 'code_verified', 'done', 'photo_step')
+
 
 class CustomUser(AbstractUser, BaseModel):
     USER_TYPE = [
@@ -37,7 +37,8 @@ class CustomUser(AbstractUser, BaseModel):
     phone_number = models.CharField(max_length=13, null=True, blank=True, unique=True)
     email = models.EmailField(null=True, blank=True, unique=True)
     image = models.ImageField(upload_to='users_images/', null=True, blank=True,
-                              validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf', 'heic', 'heif'])])
+                              validators=[FileExtensionValidator(
+                                  allowed_extensions=['jpg', 'jpeg', 'png', 'pdf', 'heic', 'heif'])])
 
     def __str__(self):
         return self.username
@@ -84,7 +85,6 @@ class CustomUser(AbstractUser, BaseModel):
             'refresh_token': str(refresh)
         }
 
-
     def save(self, *args, **kwargs):
         self.clean()
         super(CustomUser, self).save(*args, **kwargs)
@@ -96,9 +96,9 @@ class CustomUser(AbstractUser, BaseModel):
         self.hashing_password()
 
 
-
 PHONE_EXPIRATION = 2
 EMAIL_EXPIRATION = 5
+
 
 class UserConfirmation(BaseModel):
     VERIFY_TYPE = (

@@ -1,16 +1,14 @@
 from datetime import datetime
 
-from rest_framework.authentication import SessionAuthentication
+from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 
 from shared.utility import send_mail
 from .models import CustomUser, NEW, CODE_VERIFIED, VIA_EMAIL, VIA_PHONE
-from rest_framework import permissions
-from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import CustomUserSerializer, ChangeUserInfoSerializer, ChangeUserPhotoSerializer
 
 
@@ -89,6 +87,7 @@ class GetNewVerifyCode(APIView):
             }
             return ValidationError(data)
 
+
 class ChangeUserInfoView(UpdateAPIView):
     permission_classes = [AllowAny, ]
     serializer_classes = ChangeUserInfoSerializer
@@ -116,6 +115,7 @@ class ChangeUserInfoView(UpdateAPIView):
         }
         return Response(data, status=200)
 
+
 class ChangeUserPhotoView(APIView):
 
     def put(self, request, *args, **kwargs):
@@ -126,8 +126,8 @@ class ChangeUserPhotoView(APIView):
             serializer.save()
             return Response(
                 {
-                'message': 'picture uploaded successfully'
+                    'message': 'picture uploaded successfully'
                 }, status=200)
         return Response(
             serializer.errors, status=400
-            )
+        )

@@ -3,8 +3,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from shared.custom_pagination import CustomPagination
 from post.serializer import PostSerializer, PostCommentSerializer, PostLikeSerializer, CommentLikeSerializer
+from shared.custom_pagination import CustomPagination
 from .models import Post, PostComment, PostLike, CommentLike
 
 
@@ -184,11 +184,47 @@ class CommentLikesAPIView(generics.ListAPIView):
         return queryset
 
 
-class CommentLikesCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = CommentLikeSerializer
-    permission_classes = [AllowAny, ]
+class CommentLikesCreateAPIView(APIView):
 
-    def get_queryset(self):
-        comment_id = self.kwargs['pk']
-        queryset = CommentLike.objects.filter(comment__id=comment_id)
-        return queryset
+    def post(self, pk):
+        try:
+            comment_likes = CommentLike.objects.create(
+                author=self.request.user,
+                comment_id=pk
+            )
+            serializer = CommentLikeSerializer(comment_likes)
+            data = {
+                'success': True,
+                'message': 'Put like this comment',
+                'data': serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            data = {
+                'success': False,
+                'message': f"{str(e)}",
+                'data': None
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+def delete(self, pk):
+    try:
+        comment_like = CommentLike.objects.get(
+            author=self.request.user,
+            comment_id=pk
+        )
+        comment_like.delet()
+        data = {
+            'success': True,
+            'message': 'Like successfully deleted',
+            'data': None
+        }
+        return Response(data, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        data = {
+            'success': False,
+            'message': f"{str(e)}",
+            'data': None
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
