@@ -119,43 +119,12 @@ class CommentRetrieveUpdateDestroyApiView(generics.RetrieveUpdateDestroyAPIView)
         )
 
 
-class PostLikesAPIView(generics.ListAPIView):
-    serializer_class = PostLikeSerializer
-    permission_classes = [AllowAny, ]
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        queryset = PostLike.objects.all()
-        return queryset
-
-
 class PostLikesCreateAPIView(APIView):
 
     def post(self, pk):
         try:
-            post_like = PostLike.objects.create(
-                author=self.request.user,
-                post_id=pk
-            )
-            serializer = PostLikeSerializer(post_like)
-            data = {
-                'success': True,
-                'message': 'Add like this post',
-                'data': serializer.data
-            }
-            return Response(data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            data = {
-                'success': False,
-                'message': f"{str(e)}",
-                'data': None
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, pk):
-        try:
             post_like = PostLike.objects.get(
-                auhtor=self.request.user,
+                author=self.request.user,
                 post_id=pk
             )
             post_like.delete()
@@ -165,66 +134,44 @@ class PostLikesCreateAPIView(APIView):
                 'data': None
             }
             return Response(data, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
+        except PostLike.DoesNotExists:
+            post_like = PostLike.objects.create(
+                author=self.request.user,
+                post_id=pk
+            )
+            serializer = PostLikeSerializer(post_like)
             data = {
-                'success': False,
-                'message': f"{str(e)}",
-                'data': None
+                'success': True,
+                'message': 'Put like this post',
+                'data': serializer.data
             }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CommentLikesAPIView(generics.ListAPIView):
-    serializer_class = CommentLikeSerializer
-    permission_classes = [AllowAny, ]
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        queryset = CommentLike.objects.all()
-        return queryset
+            return Response(data, status=status.HTTP_201_CREATED)
 
 
 class CommentLikesCreateAPIView(APIView):
 
     def post(self, pk):
         try:
-            comment_likes = CommentLike.objects.create(
+            comment_like = CommentLike.objects.get(
                 author=self.request.user,
                 comment_id=pk
             )
-            serializer = CommentLikeSerializer(comment_likes)
+            comment_like.delete()
+            data = {
+                'success': True,
+                'message': 'Like successfully deleted',
+                'data': None
+            }
+            return Response(data, status=status.HTTP_204_NO_CONTENT)
+        except CommentLike.DoesNotExists:
+            comment_like = CommentLike.objects.create(
+                author=self.request.user,
+                comment_id=pk
+            )
+            serializer = CommentLikeSerializer(comment_like)
             data = {
                 'success': True,
                 'message': 'Put like this comment',
                 'data': serializer.data
             }
             return Response(data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            data = {
-                'success': False,
-                'message': f"{str(e)}",
-                'data': None
-            }
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-
-def delete(self, pk):
-    try:
-        comment_like = CommentLike.objects.get(
-            author=self.request.user,
-            comment_id=pk
-        )
-        comment_like.delet()
-        data = {
-            'success': True,
-            'message': 'Like successfully deleted',
-            'data': None
-        }
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-    except Exception as e:
-        data = {
-            'success': False,
-            'message': f"{str(e)}",
-            'data': None
-        }
-        return Response(data, status=status.HTTP_400_BAD_REQUEST)
