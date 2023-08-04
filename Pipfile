@@ -11,6 +11,7 @@ djangorestframework-simplejwt = "*"
 djangorestframework = "*"
 phonenumbers = "*"
 twilio = "*"
+fastapi = "*"
 
 [dev-packages]
 
